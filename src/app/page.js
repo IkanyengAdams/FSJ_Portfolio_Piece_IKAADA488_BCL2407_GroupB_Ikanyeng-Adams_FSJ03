@@ -9,6 +9,8 @@ import ErrorHandler from "./components/common/ErrorHandler";
 import SearchBar from "./components/common/SearchBar";
 import SortByCategory from "./components/common/SortByCategory";
 import SortByPrice from "./components/common/SortByPrice";
+import { db } from "../../lib/firebase";
+import { collection, query, orderBy, limit, getDocs, where, startAfter } from 'firebase/firestore';
 
 /**
  * Displays a page of products with pagination, search, and sort functionality.
@@ -31,7 +33,7 @@ export default function ProductsPage() {
   const currentPage = parseInt(searchParams.get("page")) || 1;
 
   /**
-   * Fetches products from the API based on the page number, search term, category, and price sort order.
+   * Fetches products from Firestore based on the page number, search term, category, and price sort order.
    * @param {number} page - The current page number.
    * @param {string} [searchTerm=""] - Optional search term for product filtering.
    * @param {string} [category=""] - Optional category for sorting products.
@@ -45,29 +47,40 @@ export default function ProductsPage() {
   ) => {
     setLoading(true);
     setErrorMessage("");
-    const skip = (page - 1) * productsPerPage;
-    let apiUrl = `https://next-ecommerce-api.vercel.app/products?limit=${productsPerPage}&skip=${skip}`;
-
-    if (searchTerm) apiUrl += `&search=${searchTerm}`;
-    if (category) apiUrl += `&category=${category}`;
-    if (priceOrder) apiUrl += `&sortBy=price&order=${priceOrder}`;
 
     try {
-      const res = await fetch(apiUrl);
-      const data = await res.json();
+      const productsRef = collection(db, 'products');
+      let q = query(productsRef);
 
-      if (!Array.isArray(data)) {
-        setErrorMessage("Invalid data received.");
-        setFilteredProducts([]);
-        setHasMoreProducts(false);
-      } else if (data.length === 0) {
-        setErrorMessage("Product does not exist");
+      // Apply filters
+      if (searchTerm) {
+        q = query(q, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
+      }
+      if (category) {
+        q = query(q, where('category', '==', category));
+      }
+      if (priceOrder) {
+        q = query(q, orderBy('price', priceOrder === 'asc' ? 'asc' : 'desc'));
+      }
+
+      // Fetch products with pagination
+      if (page === 1) {
+        q = query(q, limit(productsPerPage));
+      } else {
+        if (!lastVisibleProduct) return; // No more products to load
+        q = query(q, startAfter(lastVisibleProduct), limit(productsPerPage));
+      }
+
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (data.length === 0) {
+        setErrorMessage("No products found");
         setFilteredProducts([]);
         setHasMoreProducts(false);
       } else {
         setProducts(data);
-        setFilteredProducts(data);
-        setHasMoreProducts(data.length === productsPerPage);
+        setFilteredProducts(data);    
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -123,11 +136,13 @@ export default function ProductsPage() {
    * Navigates to the next page of products by updating the URL with the next page number.
    */
   const handleNextPage = () => {
-    router.push(
-      `?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${
-        currentPage + 1
-      }`
-    );
+    if (hasMoreProducts) {
+      router.push(
+        `?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${
+          currentPage + 1
+        }`
+      );
+    }
   };
 
   /**
@@ -222,23 +237,17 @@ export default function ProductsPage() {
       )}
 
       <div className="flex justify-between mt-4">
-        {currentPage > 1 && (
-          <button
-            className="bg-gray-800 text-white px-4 py-2 rounded"
-            onClick={handlePrevPage}
-          >
-            Previous
-          </button>
-        )}
+        <button
+          onClick={handlePrevPage}
+        >
+          Previous
+        </button>
 
-        {hasMoreProducts && (
-          <button
-            className="bg-gray-800 text-white px-4 py-2 rounded"
-            onClick={handleNextPage}
-          >
-            Next
-          </button>
-        )}
+        <button
+          onClick={handleNextPage}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
