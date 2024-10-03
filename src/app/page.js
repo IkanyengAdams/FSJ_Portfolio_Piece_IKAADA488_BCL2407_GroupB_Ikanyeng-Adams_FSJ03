@@ -21,6 +21,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [lastVisibleProduct, setLastVisibleProduct] = useState(null);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const productsPerPage = 20;
 
@@ -80,7 +81,9 @@ export default function ProductsPage() {
         setHasMoreProducts(false);
       } else {
         setProducts(data);
-        setFilteredProducts(data);    
+        setFilteredProducts(data);
+        setLastVisibleProduct(querySnapshot.docs[querySnapshot.docs.length - 1]);
+        setHasMoreProducts(data.length === productsPerPage);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -236,15 +239,20 @@ export default function ProductsPage() {
         )
       )}
 
+      {/* Pagination Controls */}
       <div className="flex justify-between mt-4">
         <button
           onClick={handlePrevPage}
+          disabled={currentPage <= 1}
+          className="bg-gray-800 text-white px-4 py-2 rounded disabled:opacity-50"
         >
           Previous
         </button>
 
         <button
           onClick={handleNextPage}
+          disabled={!hasMoreProducts}
+          className="bg-gray-800 text-white px-4 py-2 rounded disabled:opacity-50"
         >
           Next
         </button>
