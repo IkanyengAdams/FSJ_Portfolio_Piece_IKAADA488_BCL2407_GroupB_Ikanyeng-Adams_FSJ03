@@ -6,6 +6,8 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import ErrorHandler from "../../components/common/ErrorHandler";
 import Head from "next/head";
+import { db } from '../../../../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * ProductDetail component displays the details of a single product including images, rating, and reviews.
@@ -31,37 +33,47 @@ export default function ProductDetail({ params }) {
   const currentPage = searchParams.get("page") || 1;
 
   /**
-   * Fetches the product details based on the productId.
+   * Fetches the product details based on the productId from Cloud Firestore.
    */
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://next-ecommerce-api.vercel.app/products/${productId}`
-        );
-        const data = await res.json();
-        setProduct({
-          title: data.title,
-          description: data.description,
-          category: data.category,
-          price: data.price,
-          rating: data.rating,
-          images: data.images,
-          stock: data.stock,
-          availability: data.stock > 0 ? "In Stock" : "Out of Stock",
-          reviews: data.reviews,
-          tags: data.tags || [],
-        });
-        setSelectedImage(data.images[0]);
-        setLoading(false);
+        // Format the productId to match Firestore document ID (e.g., '002' instead of '2')
+        const formattedId = productId.toString().padStart(3, '0');
+
+        // Get a reference to the product document
+        const productRef = doc(db, 'products', formattedId); 
+        const docSnap = await getDoc(productRef); // Fetch the document
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProduct({
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            price: data.price,
+            rating: data.rating,
+            images: data.images,
+            stock: data.stock,
+            availability: data.stock > 0 ? "In Stock" : "Out of Stock",
+            reviews: data.reviews || [], // Ensure reviews are an empty array if not present
+            tags: data.tags || [],
+          });
+          setSelectedImage(data.images[0]);
+        } else {
+          console.error("No such document!");
+        }
       } catch (error) {
         console.error("Error fetching product:", error);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    if (productId) {
+      fetchProduct();
+    }
   }, [productId]);
 
   /**
@@ -227,71 +239,45 @@ export default function ProductDetail({ params }) {
       </Head>
 
       <div className="flex flex-col lg:flex-row bg-white p-6 shadow-md rounded-lg">
-        <div className="relative lg:w-1/3 w-full mb-4 lg:mb-0 lg:mr-4">
-          <button
-            onClick={() => {
-              const params = new URLSearchParams({
-                search: searchTerm,
-                category: category,
-                price: priceOrder,
-                page: currentPage,
-              });
-
-              router.push(`/?${params.toString()}`);
-            }}
-            className="absolute -top-6 left-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 z-10"
-          >
-            Back to Products
-          </button>
-
-          <div className="mb-4">
-            <img
-              src={selectedImage}
-              alt={product.title}
-              className="h-auto w-full object-cover rounded-md"
-            />
-          </div>
-
-          <div className="flex space-x-2">
-            {product.images.map((image, index) => (
+        <div className="relative lg:w-1/3 w-full mb-4 lg:mb-0">
+          {product.images && (
+            <>
               <img
-                key={index}
-                src={image}
-                alt={`${product.title} thumbnail ${index + 1}`}
-                className={`h-20 w-20 object-cover cursor-pointer rounded-md border-2 ${
-                  selectedImage === image
-                    ? "border-blue-500"
-                    : "border-transparent"
-                }`}
-                onClick={() => setSelectedImage(image)}
+                src={selectedImage}
+                alt={product.title}
+                className="w-full h-auto object-contain mb-4"
               />
-            ))}
-          </div>
+              <div className="flex justify-center mt-2 space-x-2">
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Thumbnail ${index + 1}`}
+                    className={`w-16 h-16 object-cover cursor-pointer ${
+                      image === selectedImage
+                        ? "border-2 border-indigo-500"
+                        : "border border-gray-300"
+                    }`}
+                    onClick={() => setSelectedImage(image)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
-
-        <div className="lg:w-2/3 w-full">
-          <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
-          <p className="text-gray-700 mb-4">{product.description}</p>
-          <p className="text-gray-500 mb-2">Category: {product.category}</p>
-
-          <div className="flex items-center mb-4">
-            <p className="text-gray-500 mr-2">Rating:</p>
-            <div className="flex">{renderStars(product.rating)}</div>
-            <p className="ml-2 text-gray-600">{product.rating}/5</p>
-          </div>
-          <p className="text-gray-900 font-bold text-2xl">${product.price}</p>
-
-          <p className="text-green-600 mt-2">{product.availability}</p>
-          <p className="text-gray-500">Stock: {product.stock}</p>
-
+        <div className="lg:w-2/3 w-full lg:pl-10">
+          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+          <p className="text-lg mb-2">{product.description}</p>
+          <p className="text-xl font-semibold mb-4">${product.price}</p>
+ 
           {product.tags && product.tags.length > 0 && (
-            <div className="mt-4">
-              <h3 className="font-bold text-lg mb-2">Tags:</h3>
-              <div className="flex flex-wrap">
+            <div className="mb-4">
+              <h3 className="font-bold mb-2">Tags:</h3>
+              <div className="flex flex-wrap space-x-2">
                 {product.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full mr-2 mb-2 text-sm"
+                    className="px-2 py-1 bg-gray-200 text-gray-700 rounded-md"
                   >
                     {tag}
                   </span>
