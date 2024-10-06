@@ -238,6 +238,13 @@ export default function ProductDetail({ params }) {
         <meta property="og:image" content={product ? product.images[0] : ""} />
       </Head>
 
+      <button 
+        onClick={() => router.back()} 
+        className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+      >
+        Back
+      </button>
+
       <div className="flex flex-col lg:flex-row bg-white p-6 shadow-md rounded-lg">
         <div className="relative lg:w-1/3 w-full mb-4 lg:mb-0">
           {product.images && (
@@ -269,7 +276,14 @@ export default function ProductDetail({ params }) {
           <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
           <p className="text-lg mb-2">{product.description}</p>
           <p className="text-xl font-semibold mb-4">${product.price}</p>
- 
+          <p className="mb-4">
+            {product.stock > 0 ? (
+              <span className="text-green-500">In Stock</span>
+            ) : (
+              <span className="text-red-500">Out of Stock</span>
+            )}
+          </p>
+
           {product.tags && product.tags.length > 0 && (
             <div className="mb-4">
               <h3 className="font-bold mb-2">Tags:</h3>
