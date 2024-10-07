@@ -2,16 +2,48 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { auth } from "../../../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 export default function SignUp() {
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      setLoading(false);
+
+      router.push("/");
+    } catch (err) {
+      setLoading(false);
+      setError(err.message);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-white">Sign Up</h2>
+        <h2 className="text-3xl font-bold mb-4 text-white text-center">Welcome to SwiftCart Login Page!</h2>
+        <p className="text-gray-300 mb-6 text-center">
+          If you already have an account, please{" "}
+          <Link href="/sign-in">
+            <span className="text-blue-400 underline hover:text-blue-600">Sign In</span>
+          </Link>
+        </p>
+        
         {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form onSubmit={handleSignUp}>
           <div className="mb-4">
             <label className="block text-white text-sm font-medium mb-2" htmlFor="email">
