@@ -3,6 +3,7 @@
 import "../app/global.css";
 import { FaHeart, FaShoppingCart, FaUser, FaBars } from "react-icons/fa";
 import { useState } from "react";
+import Link from "next/link";
 
 /**
  * Layout component that wraps the main application layout, including navigation and children content.
@@ -54,10 +55,12 @@ export default function Layout({ children }) {
                 <FaShoppingCart className="text-xl mr-2" />
                 <span>Cart</span>
               </div>
-              <div className="flex items-center text-white cursor-pointer">
-                <FaUser className="text-xl mr-2" />
-                <span>Login</span>
-              </div>
+              <Link href="/sign-up"> {/* Link to the Sign Up page */}
+                <div className="flex items-center text-white cursor-pointer">
+                  <FaUser className="text-xl mr-2" />
+                  <span>Login</span>
+                </div>
+              </Link>
             </div>
           </div>
 
@@ -76,10 +79,12 @@ export default function Layout({ children }) {
                 <FaShoppingCart className="text-xl mr-2" />
                 <span>Cart</span>
               </div>
-              <div className="flex items-center text-white w-full cursor-pointer">
-                <FaUser className="text-xl mr-2" />
-                <span>Login</span>
-              </div>
+              <Link href="/sign-up">
+                <div className="flex items-center text-white w-full cursor-pointer">
+                  <FaUser className="text-xl mr-2" />
+                  <span>Login</span>
+                </div>
+              </Link>
             </div>
           </div>
         </nav>
