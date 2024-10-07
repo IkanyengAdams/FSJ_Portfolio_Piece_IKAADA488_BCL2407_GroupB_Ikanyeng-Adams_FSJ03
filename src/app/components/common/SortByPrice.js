@@ -22,9 +22,16 @@ export default function SortByPrice({ onSort }) {
     if (sortOrder) {
       const fetchSortedProducts = async () => {
         try {
-          
+          const productsRef = collection(db, "products");
 
-          
+          const q = query(productsRef, orderBy("price", sortOrder));
+
+          const querySnapshot = await getDocs(q);
+
+          const sortedProducts = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
           onSort(sortedProducts);
         } catch (error) {
@@ -34,7 +41,7 @@ export default function SortByPrice({ onSort }) {
 
       fetchSortedProducts();
     }
-  }, [sortOrder,]);
+  }, [sortOrder, onSort]);
 
   return (
     <div className="flex justify-center lg:justify-end mb-4">
