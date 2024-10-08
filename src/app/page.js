@@ -124,7 +124,45 @@ export default function ProductsPage() {
       ) : errorMessage ? (
         <div className="text-center text-red-500 font-bold">{errorMessage}</div>
       ) : (
-        
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {products.length === 0 ? (
+              <ErrorHandler />
+            ) : (
+              products.map((product) => (
+                <div key={product.id} className="bg-white p-4 shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg">
+                  {/* Display product image if available */}
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.title}
+                      className="w-full h-48 object-contain mb-4" // Ensure images are displayed fully
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-300 mb-4 rounded flex items-center justify-center">
+                      <span>No Image Available</span>
+                    </div>
+                  )}
+                  <h2 className="text-xl font-semibold mb-2 text-black">{product.title}</h2>
+                  <p className="text-gray-800">{product.category}</p>
+                  <p className="text-gray-900 font-bold">${product.price}</p>
+
+                  <div className="flex justify-center mt-4">
+                    <Link
+                      href={{
+                        pathname: `/products/${product.id}`,
+                        query: {
+                          search: searchTerm,
+                          category: category,
+                          price: priceOrder,
+                        },
+                      }}
+                    >
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        View Product
+                      </button>
+                    </Link>
+                  </div>
 
                   <div className="flex justify-center space-x-4 mt-2">
                     <FaHeart className="text-gray-400 text-xl" />
