@@ -1,4 +1,4 @@
-"use client"; // Ensure this component can use client-side features
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation"; 
@@ -32,12 +32,17 @@ export default function SignIn() {
     }
   };
 
+
+  const goToSignUp = () => {
+    router.push("/sign-up");
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-white">Sign In</h2>
         
-        {/* Information message for users */}
+    
         <p className="text-gray-300 mb-4">
           Please sign in with your correct credentials.
         </p>
@@ -81,6 +86,13 @@ export default function SignIn() {
             {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
+
+        <button
+          onClick={goToSignUp}
+          className="mt-4 w-full py-2 px-4 bg-gray-600 text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 hover:bg-gray-700"
+        >
+          Do not have an account? Sign Up
+        </button>
       </div>
     </div>
   );
