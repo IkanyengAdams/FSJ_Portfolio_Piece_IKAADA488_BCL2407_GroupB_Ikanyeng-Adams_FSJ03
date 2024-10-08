@@ -1,13 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation"; 
+import { auth } from "../../../lib/firebase";
+import { signOut } from "firebase/auth";
 import { useState } from "react";
 
 export default function SignOut() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
+  const handleSignOut = async () => {
+    setLoading(true);
+    try {
+      await signOut(auth);
+      setLoading(false);
+      router.push("/");
+    } catch (error) {
+      setLoading(false);
+      console.error("Error signing out: ", error);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
