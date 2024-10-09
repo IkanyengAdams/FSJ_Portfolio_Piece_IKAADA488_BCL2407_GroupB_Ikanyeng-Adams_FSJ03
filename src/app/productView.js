@@ -15,7 +15,7 @@ import SortByPrice from "./components/common/SortByPrice";
  * Displays a page of products with search and sort functionality.
  * @returns {JSX.Element} The ProductsPage component.
  */
-export default function ProductsView() {
+export default function ProductView() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
