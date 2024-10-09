@@ -13,7 +13,15 @@ export async function POST(req, { params }) {
 
   try {
   
-    
+    const reviewsRef = collection(db, "products", productId, "reviews");
+
+
+    await addDoc(reviewsRef, {
+      rating,
+      comment,
+      reviewerEmail,
+      reviewerName,
+      date: Timestamp.now(),
     });
 
     return new Response("Review added successfully", { status: 201 });
