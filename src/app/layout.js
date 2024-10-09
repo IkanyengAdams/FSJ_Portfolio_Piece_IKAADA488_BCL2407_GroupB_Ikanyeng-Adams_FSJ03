@@ -10,7 +10,21 @@ import { useRouter } from "next/navigation";
 
 export default function Layout({ children }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
- 
+  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
