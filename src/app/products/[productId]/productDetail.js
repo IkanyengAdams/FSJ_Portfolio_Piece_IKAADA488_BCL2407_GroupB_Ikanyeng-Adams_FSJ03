@@ -18,8 +18,14 @@ export default function ProductDetail({ params }) {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [reviewerEmail, setReviewerEmail] = useState('');
+  const [reviewerName, setReviewerName] = useState('');
+  const [reviewError, setReviewError] = useState(null);
+  const [reviewSuccess, setReviewSuccess] = useState(null);
 
   /**
    * Fetches the product details based on the productId from local API.
@@ -54,12 +60,11 @@ export default function ProductDetail({ params }) {
     fetchProduct();
   }, [productId]);
 
-  
   const renderReviews = (reviews) => {
     if (!reviews || reviews.length === 0) {
       return <p className="text-gray-500">No reviews yet.</p>;
     }
-    
+
     return (
       <div className="mt-4">
         <h3 className="font-bold mb-2">Reviews:</h3>
@@ -74,7 +79,7 @@ export default function ProductDetail({ params }) {
                 {Array.from({ length: 5 - Math.ceil(review.rating) }, (_, i) => (
                   <FaRegStar key={i} className="text-yellow-500" />
                 ))}
-                <span className="ml-2 text-gray-600">{review.username}</span>
+                <span className="ml-2 text-gray-600">{review.reviewerName}</span>
               </div>
               <p className="text-gray-700">{review.comment}</p>
             </div>
@@ -85,7 +90,7 @@ export default function ProductDetail({ params }) {
   };
 
   if (loading) return <Spinner />;
-  if (error) return <ErrorHandler message={error} />; // Display error message
+  if (error) return <ErrorHandler message={error} />;
 
   return (
     <div className="container mx-auto p-4">
@@ -144,6 +149,63 @@ export default function ProductDetail({ params }) {
           )}
 
           {renderReviews(product.reviews)}
+
+  
+          <div className="mt-6">
+            <h2 className="font-bold mb-2">Write a Review:</h2>
+            {reviewError && <p className="text-red-500">{reviewError}</p>}
+            {reviewSuccess && <p className="text-green-500">{reviewSuccess}</p>}
+            <form onSubmit={submitReview} className="space-y-4">
+              <div>
+                <label className="block mb-1" htmlFor="rating">Rating:</label>
+                <select
+                  id="rating"
+                  value={rating}
+                  onChange={(e) => setRating(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                >
+                  <option value="">Select Rating</option>
+                  {[1, 2, 3, 4, 5].map((rate) => (
+                    <option key={rate} value={rate}>{rate}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1" htmlFor="comment">Comment:</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1" htmlFor="reviewerName">Your Name:</label>
+                <input
+                  id="reviewerName"
+                  type="text"
+                  value={reviewerName}
+                  onChange={(e) => setReviewerName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1" htmlFor="reviewerEmail">Your Email:</label>
+                <input
+                  id="reviewerEmail"
+                  type="email"
+                  value={reviewerEmail}
+                  onChange={(e) => setReviewerEmail(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <button type="submit" className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Submit Review</button>
+            </form>
+          </div>
 
           {/* Optional: Render dimensions if available */}
           {product.dimensions && Object.keys(product.dimensions).length > 0 && (
