@@ -6,15 +6,14 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import ErrorHandler from "../../components/common/ErrorHandler";
 import Head from "next/head";
 import { useRouter } from 'next/navigation';
+import { db } from "../../../../lib/firebase"; 
+import { collection, getDocs } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-/**
- * ProductDetail component displays the details of a single product including images, rating, and reviews.
- * @param {Object} params - The route parameters provided by Next.js (contains productId).
- * @returns {JSX.Element} The ProductDetail component.
- */
 export default function ProductDetail({ params }) {
   const { productId } = params; // Use params directly to get the productId
   const router = useRouter(); // Initialize the router
+  const auth = getAuth(); // Initialize Firebase Auth
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,10 +25,16 @@ export default function ProductDetail({ params }) {
   const [reviewerName, setReviewerName] = useState('');
   const [reviewError, setReviewError] = useState(null);
   const [reviewSuccess, setReviewSuccess] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  /**
-   * Fetches the product details based on the productId from local API.
-   */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
   useEffect(() => {
     const fetchProduct = async () => {
       if (!productId) return;
@@ -46,6 +51,11 @@ export default function ProductDetail({ params }) {
         if (data.product) {
           setProduct(data.product);
           setSelectedImage(data.product.images[0] || null);
+
+          
+          const reviewsSnapshot = await getDocs(collection(db, "products", productId, "reviews"));
+          const reviews = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setProduct(prevProduct => ({ ...prevProduct, reviews }));
         } else {
           setError("Product not found");
         }
@@ -69,8 +79,8 @@ export default function ProductDetail({ params }) {
       <div className="mt-4">
         <h3 className="font-bold mb-2">Reviews:</h3>
         <div>
-          {reviews.map((review, index) => (
-            <div key={index} className="border-b mb-2 pb-2">
+          {reviews.map((review) => (
+            <div key={review.id} className="border-b mb-2 pb-2">
               <div className="flex items-center mb-1">
                 {Array.from({ length: review.rating }, (_, i) => (
                   <FaStar key={i} className="text-yellow-500" />
@@ -82,6 +92,9 @@ export default function ProductDetail({ params }) {
                 <span className="ml-2 text-gray-600">{review.reviewerName}</span>
               </div>
               <p className="text-gray-700">{review.comment}</p>
+              <p className="text-gray-500 text-sm">
+                {review.date && new Date(review.date.seconds * 1000).toLocaleDateString()}
+              </p>
             </div>
           ))}
         </div>
@@ -91,6 +104,11 @@ export default function ProductDetail({ params }) {
 
   const submitReview = async (e) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      setReviewError("Please login first to submit a review.");
+      return;
+    }
+
     setReviewError(null);
     setReviewSuccess(null);
     
@@ -108,13 +126,12 @@ export default function ProductDetail({ params }) {
         throw new Error(errorMessage);
       }
 
-      
       const newReview = {
         rating,
         comment,
         reviewerName,
+        date: { seconds: Math.floor(Date.now() / 1000) },
       };
-
 
       setProduct((prevProduct) => ({
         ...prevProduct,
@@ -192,70 +209,55 @@ export default function ProductDetail({ params }) {
 
           {renderReviews(product.reviews)}
 
-  
           <div className="mt-6">
             <h2 className="font-bold mb-2">Write a Review:</h2>
             {reviewError && <p className="text-red-500">{reviewError}</p>}
             {reviewSuccess && <p className="text-green-500">{reviewSuccess}</p>}
-            <form onSubmit={submitReview} className="space-y-4">
+            <form onSubmit={submitReview} className="flex flex-col space-y-4">
               <div>
-                <label className="block mb-1" htmlFor="rating">Rating:</label>
-                <select
-                  id="rating"
-                  value={rating}
-                  onChange={(e) => setRating(Number(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md p-2"
-                  required
-                >
+                <label className="block mb-1">Rating:</label>
+                <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="border rounded-md p-2 w-full">
                   <option value="">Select Rating</option>
-                  {[1, 2, 3, 4, 5].map((rate) => (
-                    <option key={rate} value={rate}>{rate}</option>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <option key={star} value={star}>{star} Star{star > 1 ? 's' : ''}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block mb-1" htmlFor="comment">Comment:</label>
+                <label className="block mb-1">Comment:</label>
                 <textarea
-                  id="comment"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+                  className="border rounded-md p-2 w-full"
+                  rows="4"
                   required
                 />
               </div>
               <div>
-                <label className="block mb-1" htmlFor="reviewerName">Your Name:</label>
+                <label className="block mb-1">Your Name:</label>
                 <input
-                  id="reviewerName"
                   type="text"
                   value={reviewerName}
                   onChange={(e) => setReviewerName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+                  className="border rounded-md p-2 w-full"
                   required
                 />
               </div>
               <div>
-                <label className="block mb-1" htmlFor="reviewerEmail">Your Email:</label>
+                <label className="block mb-1">Your Email:</label>
                 <input
-                  id="reviewerEmail"
                   type="email"
                   value={reviewerEmail}
                   onChange={(e) => setReviewerEmail(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+                  className="border rounded-md p-2 w-full"
                   required
                 />
               </div>
-              <button type="submit" className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Submit Review</button>
+              <button type="submit" className="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
+                Submit Review
+              </button>
             </form>
           </div>
-
-          {/* Optional: Render dimensions if available */}
-          {product.dimensions && Object.keys(product.dimensions).length > 0 && (
-            <div className="mt-4">
-              <h3 className="font-bold mb-2">Dimensions:</h3>
-              <p>{JSON.stringify(product.dimensions)}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
