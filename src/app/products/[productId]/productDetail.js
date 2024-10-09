@@ -89,6 +89,48 @@ export default function ProductDetail({ params }) {
     );
   };
 
+  const submitReview = async (e) => {
+    e.preventDefault();
+    setReviewError(null);
+    setReviewSuccess(null);
+    
+    try {
+      const response = await fetch(`/api/products/${productId}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rating, comment, reviewerEmail, reviewerName }),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      
+      const newReview = {
+        rating,
+        comment,
+        reviewerName,
+      };
+
+
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        reviews: [...prevProduct.reviews, newReview],
+      }));
+
+      setReviewSuccess("Review submitted successfully!");
+      setRating(0);
+      setComment('');
+      setReviewerEmail('');
+      setReviewerName('');
+    } catch (error) {
+      setReviewError(error.message);
+    }
+  };
+
   if (loading) return <Spinner />;
   if (error) return <ErrorHandler message={error} />;
 
