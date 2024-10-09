@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaShoppingCart, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Spinner from "./components/common/Spinner";
 import ErrorHandler from "./components/common/ErrorHandler";
 import SearchBar from "./components/common/SearchBar";
@@ -13,6 +12,7 @@ import SortByPrice from "./components/common/SortByPrice";
 
 /**
  * Displays a page of products with search and sort functionality.
+ * Includes an image carousel for products with more than one image.
  * @returns {JSX.Element} The ProductsPage component.
  */
 export default function ProductView() {
@@ -21,6 +21,7 @@ export default function ProductView() {
   const [errorMessage, setErrorMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [carouselIndex, setCarouselIndex] = useState({}); // Store the current index for each product's image carousel
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,6 +98,22 @@ export default function ProductView() {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
+  // Function to handle the next image in the carousel
+  const handleNextImage = (productId) => {
+    setCarouselIndex((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] + 1) % products.find(p => p.id === productId).images.length,
+    }));
+  };
+
+  // Function to handle the previous image in the carousel
+  const handlePreviousImage = (productId) => {
+    setCarouselIndex((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] - 1 + products.find(p => p.id === productId).images.length) % products.find(p => p.id === productId).images.length,
+    }));
+  };
+
   return (
     <div className="cover mx-auto p-4">
       <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center lg:space-x-4 mb-4 space-y-4 lg:space-y-0">
@@ -131,13 +148,18 @@ export default function ProductView() {
             ) : (
               products.map((product) => (
                 <div key={product.id} className="bg-white p-4 shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg">
-                  {/* Display product image if available */}
+                
                   {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.title}
-                      className="w-full h-48 object-contain mb-4" // Ensure images are displayed fully
-                    />
+                    <div className="relative">
+                      <img
+                        src={product.images[carouselIndex[product.id] || 0]}
+                        alt={product.title}
+                        className="w-full h-48 object-contain mb-4"
+                      />
+                      {product.images.length > 1 && (
+                       
+                      )}
+                    </div>
                   ) : (
                     <div className="w-full h-48 bg-gray-300 mb-4 rounded flex items-center justify-center">
                       <span>No Image Available</span>
