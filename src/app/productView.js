@@ -157,7 +157,20 @@ export default function ProductView() {
                         className="w-full h-48 object-contain mb-4"
                       />
                       {product.images.length > 1 && (
-                       
+                        <div className="absolute inset-0 flex justify-between items-center">
+                          <button
+                            className="bg-gray-800 text-white p-2 rounded-full"
+                            onClick={() => handlePreviousImage(product.id)}
+                          >
+                            <FaArrowLeft />
+                          </button>
+                          <button
+                            className="bg-gray-800 text-white p-2 rounded-full"
+                            onClick={() => handleNextImage(product.id)}
+                          >
+                            <FaArrowRight />
+                          </button>
+                        </div>
                       )}
                     </div>
                   ) : (
