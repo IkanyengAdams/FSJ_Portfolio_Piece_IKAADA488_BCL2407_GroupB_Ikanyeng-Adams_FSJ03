@@ -10,10 +10,16 @@ import SearchBar from "./components/common/SearchBar";
 import SortByCategory from "./components/common/SortByCategory";
 import SortByPrice from "./components/common/SortByPrice";
 
+/**
+ * Displays a page of products with search and sort functionality.
+ * Includes an image carousel for products with more than one image.
+ * @returns {JSX.Element} The ProductsPage component.
+ */
 export default function ProductView() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState({});
 
@@ -23,7 +29,6 @@ export default function ProductView() {
   const searchTerm = searchParams.get("search") || "";
   const category = searchParams.get("category") || "";
   const priceOrder = searchParams.get("price") || "";
-  const currentPage = Number(searchParams.get("page")) || 1;
 
   const fetchProducts = async (searchTerm = "", category = "", priceOrder = "", page = 1) => {
     setLoading(true);
@@ -48,6 +53,13 @@ export default function ProductView() {
         } else {
           setProducts(data.products);
           setTotalPages(data.totalPages);
+          setCurrentPage(page);
+
+          const initialCarouselIndex = data.products.reduce((acc, product) => {
+            acc[product.id] = 0;
+            return acc;
+          }, {});
+          setCarouselIndex(initialCarouselIndex);
         }
       } else {
         setErrorMessage("Failed to fetch products from the API.");
@@ -65,57 +77,67 @@ export default function ProductView() {
   }, [searchTerm, category, priceOrder, currentPage]);
 
   const handleSearch = (term) => {
-    router.push(`?search=${term}&category=${category}&price=${priceOrder}&page=1`);
+    setCurrentPage(1);
+    router.push(`?search=${term}&category=${category}&price=${priceOrder}`);
   };
 
-  const handleSort = (newCategory) => {
-    router.push(`?search=${searchTerm}&category=${newCategory}&price=${priceOrder}&page=1`);
+  const handleSort = (category) => {
+    setCurrentPage(1);
+    router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}`);
   };
 
   const handleSortByPrice = (order) => {
-    router.push(`?search=${searchTerm}&category=${category}&price=${order}&page=1`);
+    setCurrentPage(1);
+    router.push(`?search=${searchTerm}&category=${category}&price=${order}`);
   };
 
   const handleReset = () => {
-    router.push(`?search=&category=&price=&page=1`);
+    setCurrentPage(1);
+    router.push(`?`);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${currentPage + 1}`);
-    }
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${currentPage - 1}`);
-    }
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
-  // Carousel logic
   const handleNextImage = (productId) => {
     setCarouselIndex((prev) => ({
       ...prev,
-      [productId]: (prev[productId] + 1) % products.find(p => p.id === productId).images.length,
+      [productId]: ((prev[productId] || 0) + 1) % products.find(p => p.id === productId).images.length,
     }));
   };
 
   const handlePreviousImage = (productId) => {
     setCarouselIndex((prev) => ({
       ...prev,
-      [productId]: (prev[productId] - 1 + products.find(p => p.id === productId).images.length) % products.find(p => p.id === productId).images.length,
+      [productId]: ((prev[productId] || 0) - 1 + products.find(p => p.id === productId).images.length) % products.find(p => p.id === productId).images.length,
     }));
   };
 
   return (
     <div className="cover mx-auto p-4">
       <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center lg:space-x-4 mb-4 space-y-4 lg:space-y-0">
-        <SearchBar onSearch={handleSearch} />
-        <SortByCategory onSort={handleSort} />
-        <SortByPrice onSort={handleSortByPrice} />
-        <button className="bg-gray-800 mb-4 text-white w-full lg:w-auto px-4 py-2 rounded" onClick={handleReset}>
-          Reset Filters
-        </button>
+        <div className="w-full lg:w-auto">
+          <SearchBar onSearch={handleSearch} />
+        </div>
+
+        <div className="w-full lg:w-auto">
+          <SortByCategory onSort={handleSort} />
+        </div>
+
+        <div className="w-full lg:w-auto">
+          <SortByPrice onSort={handleSortByPrice} />
+        </div>
+
+        <div className="w-full lg:w-auto">
+          <button className="bg-gray-800 mb-4 text-white w-full lg:w-auto px-4 py-2 rounded" onClick={handleReset}>
+            Reset Filters
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -130,6 +152,7 @@ export default function ProductView() {
             ) : (
               products.map((product) => (
                 <div key={product.id} className="bg-white p-4 shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg">
+                
                   {product.images && product.images.length > 0 ? (
                     <div className="relative">
                       <img
@@ -139,10 +162,16 @@ export default function ProductView() {
                       />
                       {product.images.length > 1 && (
                         <div className="absolute inset-0 flex justify-between items-center">
-                          <button className="bg-gray-800 text-white p-2 rounded-full" onClick={() => handlePreviousImage(product.id)}>
+                          <button
+                            className="bg-gray-800 text-white p-2 rounded-full"
+                            onClick={() => handlePreviousImage(product.id)}
+                          >
                             <FaArrowLeft />
                           </button>
-                          <button className="bg-gray-800 text-white p-2 rounded-full" onClick={() => handleNextImage(product.id)}>
+                          <button
+                            className="bg-gray-800 text-white p-2 rounded-full"
+                            onClick={() => handleNextImage(product.id)}
+                          >
                             <FaArrowRight />
                           </button>
                         </div>
@@ -184,16 +213,16 @@ export default function ProductView() {
           </div>
 
           <div className="flex justify-between mt-4">
-            <button
-              onClick={handlePreviousPage}
+            <button 
+              onClick={handlePreviousPage} 
               disabled={currentPage === 1}
               className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
             >
               Previous
             </button>
             <span>Page {currentPage} of {totalPages}</span>
-            <button
-              onClick={handleNextPage}
+            <button 
+              onClick={handleNextPage} 
               disabled={currentPage === totalPages}
               className="bg-gray-500 text-white px-4 py-2 rounded"
             >
