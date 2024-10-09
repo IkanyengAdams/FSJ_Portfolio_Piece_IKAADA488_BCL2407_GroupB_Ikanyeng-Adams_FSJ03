@@ -7,8 +7,5 @@ import ProductDetail from "./productDetail";
  * @returns {JSX.Element} The ProductDetail component.
  */
 export default function ProductDetailPage({ params }) {
-    return (
-
-        <ProductDetail params={params} />
-    );
+  return <ProductDetail params={params} />;
 }

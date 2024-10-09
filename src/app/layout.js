@@ -7,7 +7,7 @@ import Link from "next/link";
 import { auth } from "../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import Head from 'next/head'; // Import Head from Next.js
+import Head from "next/head"; // Import Head from Next.js
 
 export default function Layout({ children }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -15,7 +15,6 @@ export default function Layout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setLoggedIn(true);
@@ -34,17 +33,24 @@ export default function Layout({ children }) {
   return (
     <html lang="en">
       <head>
-      <link rel="icon" href="/icon.png" /> 
+        <link rel="icon" href="/icon.png" />
       </head>
       <body>
         <nav className="bg-gray-800 p-4 fixed top-0 left-0 w-full z-50">
           <div className="flex items-center justify-between">
             <a href="/" className="flex items-center">
-              <img src="/online-shop.png" alt="Shop Logo" className="h-8 mr-2" />
+              <img
+                src="/online-shop.png"
+                alt="Shop Logo"
+                className="h-8 mr-2"
+              />
               <h1 className="text-white text-2xl font-bold">SwiftCart</h1>
             </a>
 
-            <button onClick={toggleNav} className="text-white text-2xl lg:hidden focus:outline-none">
+            <button
+              onClick={toggleNav}
+              className="text-white text-2xl lg:hidden focus:outline-none"
+            >
               <FaBars />
             </button>
 
@@ -75,9 +81,11 @@ export default function Layout({ children }) {
             </div>
           </div>
 
-          <div className={`${
+          <div
+            className={`${
               isNavOpen ? "max-h-40" : "max-h-0"
-            } overflow-hidden transition-all duration-500 ease-in-out lg:hidden`}>
+            } overflow-hidden transition-all duration-500 ease-in-out lg:hidden`}
+          >
             <div className="flex flex-col items-start space-y-4 mt-4">
               <div className="flex items-center text-white w-full cursor-pointer">
                 <FaHeart className="text-xl mr-2" />

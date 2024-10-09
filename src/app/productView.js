@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaHeart, FaShoppingCart, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import {
+  FaHeart,
+  FaShoppingCart,
+  FaArrowLeft,
+  FaArrowRight,
+} from "react-icons/fa";
 import Spinner from "./components/common/Spinner";
 import ErrorHandler from "./components/common/ErrorHandler";
 import SearchBar from "./components/common/SearchBar";
@@ -30,7 +35,12 @@ export default function ProductView() {
   const category = searchParams.get("category") || "";
   const priceOrder = searchParams.get("price") || "";
 
-  const fetchProducts = async (searchTerm = "", category = "", priceOrder = "", page = 1) => {
+  const fetchProducts = async (
+    searchTerm = "",
+    category = "",
+    priceOrder = "",
+    page = 1
+  ) => {
     setLoading(true);
     setErrorMessage("");
 
@@ -83,7 +93,9 @@ export default function ProductView() {
 
   const handleSort = (category) => {
     setCurrentPage(1);
-    router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}`);
+    router.push(
+      `?search=${searchTerm}&category=${category}&price=${priceOrder}`
+    );
   };
 
   const handleSortByPrice = (order) => {
@@ -107,14 +119,20 @@ export default function ProductView() {
   const handleNextImage = (productId) => {
     setCarouselIndex((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) + 1) % products.find(p => p.id === productId).images.length,
+      [productId]:
+        ((prev[productId] || 0) + 1) %
+        products.find((p) => p.id === productId).images.length,
     }));
   };
 
   const handlePreviousImage = (productId) => {
     setCarouselIndex((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) - 1 + products.find(p => p.id === productId).images.length) % products.find(p => p.id === productId).images.length,
+      [productId]:
+        ((prev[productId] || 0) -
+          1 +
+          products.find((p) => p.id === productId).images.length) %
+        products.find((p) => p.id === productId).images.length,
     }));
   };
 
@@ -134,7 +152,10 @@ export default function ProductView() {
         </div>
 
         <div className="w-full lg:w-auto">
-          <button className="bg-gray-800 mb-4 text-white w-full lg:w-auto px-4 py-2 rounded" onClick={handleReset}>
+          <button
+            className="bg-gray-800 mb-4 text-white w-full lg:w-auto px-4 py-2 rounded"
+            onClick={handleReset}
+          >
             Reset Filters
           </button>
         </div>
@@ -151,8 +172,10 @@ export default function ProductView() {
               <ErrorHandler />
             ) : (
               products.map((product) => (
-                <div key={product.id} className="bg-white p-4 shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg">
-                
+                <div
+                  key={product.id}
+                  className="bg-white p-4 shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg"
+                >
                   {product.images && product.images.length > 0 ? (
                     <div className="relative">
                       <img
@@ -182,7 +205,9 @@ export default function ProductView() {
                       <span>No Image Available</span>
                     </div>
                   )}
-                  <h2 className="text-xl font-semibold mb-2 text-black">{product.title}</h2>
+                  <h2 className="text-xl font-semibold mb-2 text-black">
+                    {product.title}
+                  </h2>
                   <p className="text-gray-800">{product.category}</p>
                   <p className="text-gray-900 font-bold">${product.price}</p>
 
@@ -213,16 +238,18 @@ export default function ProductView() {
           </div>
 
           <div className="flex justify-between mt-4">
-            <button 
-              onClick={handlePreviousPage} 
+            <button
+              onClick={handlePreviousPage}
               disabled={currentPage === 1}
               className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
             >
               Previous
             </button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button 
-              onClick={handleNextPage} 
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
               disabled={currentPage === totalPages}
               className="bg-gray-500 text-white px-4 py-2 rounded"
             >
