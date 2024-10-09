@@ -122,7 +122,41 @@ export default function ProductDetail({ params }) {
     );
   };
 
-  
+  const handleEditReview = (review) => {
+    setEditingReviewId(review.id);
+    setComment(review.comment);
+  };
+
+  const handleUpdateReview = async (e, reviewId) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, "products", productId, "reviews", reviewId), { comment });
+      const updatedReviews = product.reviews.map(review =>
+        review.id === reviewId ? { ...review, comment } : review
+      );
+      setProduct(prevProduct => ({ ...prevProduct, reviews: updatedReviews }));
+      setReviewSuccess("Review updated successfully!");
+      setEditingReviewId(null);
+      setComment('');
+    } catch (error) {
+      setReviewError("Failed to update review.");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    // Instead of a confirmation dialog, we will handle it directly
+    try {
+      await deleteDoc(doc(db, "products", productId, "reviews", reviewId));
+      const updatedReviews = product.reviews.filter(review => review.id !== reviewId);
+      setProduct(prevProduct => ({ ...prevProduct, reviews: updatedReviews }));
+      setReviewSuccess("Review deleted successfully!");
+    } catch (error) {
+      setReviewError("Failed to delete review.");
+      console.error(error);
+    }
+  };
+
   const submitReview = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
