@@ -7,6 +7,7 @@ import Link from "next/link";
 import { auth } from "../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Head from 'next/head'; // Import Head from Next.js
 
 export default function Layout({ children }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -32,6 +33,9 @@ export default function Layout({ children }) {
 
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" href="/icon.png" /> 
+      </head>
       <body>
         <nav className="bg-gray-800 p-4 fixed top-0 left-0 w-full z-50">
           <div className="flex items-center justify-between">
