@@ -7,13 +7,13 @@ import ErrorHandler from "../../components/common/ErrorHandler";
 import Head from "next/head";
 import { useRouter } from 'next/navigation';
 import { db } from "../../../../lib/firebase"; 
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function ProductDetail({ params }) {
-  const { productId } = params; // Use params directly to get the productId
-  const router = useRouter(); // Initialize the router
-  const auth = getAuth(); // Initialize Firebase Auth
+  const { productId } = params;
+  const router = useRouter();
+  const auth = getAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,8 @@ export default function ProductDetail({ params }) {
   const [reviewError, setReviewError] = useState(null);
   const [reviewSuccess, setReviewSuccess] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsLoggedIn(!!user);
@@ -52,7 +53,6 @@ export default function ProductDetail({ params }) {
           setProduct(data.product);
           setSelectedImage(data.product.images[0] || null);
 
-          
           const reviewsSnapshot = await getDocs(collection(db, "products", productId, "reviews"));
           const reviews = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setProduct(prevProduct => ({ ...prevProduct, reviews }));
@@ -95,6 +95,26 @@ export default function ProductDetail({ params }) {
               <p className="text-gray-500 text-sm">
                 {review.date && new Date(review.date.seconds * 1000).toLocaleDateString()}
               </p>
+              <div className="flex space-x-2 mt-2">
+                <button onClick={() => handleEditReview(review)} className="px-4 py-2 border border-blue-500 text-blue-500 bg-white rounded-md hover:bg-blue-500 hover:text-white transition">
+                  Edit
+                </button>
+                <button onClick={() => handleDeleteReview(review.id)} className="px-4 py-2 border border-red-500 text-red-500 bg-white rounded-md hover:bg-red-500 hover:text-white transition">
+                  Delete
+                </button>
+              </div>
+              {editingReviewId === review.id && (
+                <form onSubmit={(e) => handleUpdateReview(e, review.id)} className="mt-4">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="border rounded-md p-2 w-full"
+                    rows="4"
+                    required
+                  />
+                  <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition mt-2">Update Review</button>
+                </form>
+              )}
             </div>
           ))}
         </div>
@@ -102,6 +122,7 @@ export default function ProductDetail({ params }) {
     );
   };
 
+  
   const submitReview = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
@@ -170,94 +191,58 @@ export default function ProductDetail({ params }) {
           {product.images && (
             <>
               <img src={selectedImage} alt={product.title} className="w-full h-auto object-contain mb-4" />
-              <div className="flex justify-center mt-2 space-x-2">
-                {product.images.map((image, index) => (
+              <div className="flex space-x-2">
+                {product.images.map((image) => (
                   <img
-                    key={index}
+                    key={image}
                     src={image}
-                    alt={`Thumbnail ${index + 1}`}
-                    className={`w-16 h-16 object-cover cursor-pointer ${image === selectedImage ? "border-2 border-indigo-500" : "border border-gray-300"}`}
+                    alt={product.title}
                     onClick={() => setSelectedImage(image)}
+                    className={`cursor-pointer w-16 h-16 object-cover ${image === selectedImage ? "border-2 border-blue-500" : "border"}`}
                   />
                 ))}
               </div>
             </>
           )}
         </div>
-        <div className="lg:w-2/3 w-full lg:pl-10">
-          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
-          <p className="text-lg mb-2">{product.description}</p>
-          <p className="text-xl font-semibold mb-4">${product.price}</p>
-          <p className="mb-4">
-            {product.stock > 0 ? (
-              <span className="text-green-500">In Stock</span>
-            ) : (
-              <span className="text-red-500">Out of Stock</span>
-            )}
-          </p>
 
-          {product.tags && product.tags.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-bold mb-2">Tags:</h3>
-              <div className="flex flex-wrap space-x-2">
-                {product.tags.map((tag, index) => (
-                  <span key={index} className="px-2 py-1 bg-gray-200 text-gray-700 rounded-md">{tag}</span>
+        <div className="lg:w-2/3 w-full pl-4">
+          <h1 className="text-2xl font-bold">{product.title}</h1>
+          <p className="text-lg text-gray-600">{`$${product.price.toFixed(2)}`}</p>
+          <p className="mt-4">{product.description}</p>
+
+          <div className="mt-4">
+            <h2 className="font-bold">Add a Review:</h2>
+            <form onSubmit={submitReview} className="mt-2">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="border rounded-md p-2 w-full"
+                rows="4"
+                required
+              />
+              <div className="flex items-center mt-2">
+                <label className="mr-2">Rating:</label>
+                {[1, 2, 3, 4, 5].map((rate) => (
+                  <label key={rate} className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      value={rate}
+                      checked={rating === rate}
+                      onChange={(e) => setRating(Number(e.target.value))}
+                      className="hidden"
+                    />
+                    <FaStar className={`text-yellow-500 ${rating >= rate ? "text-yellow-500" : "text-gray-300"}`} />
+                  </label>
                 ))}
               </div>
-            </div>
-          )}
-
-          {renderReviews(product.reviews)}
-
-          <div className="mt-6">
-            <h2 className="font-bold mb-2">Write a Review:</h2>
-            {reviewError && <p className="text-red-500">{reviewError}</p>}
-            {reviewSuccess && <p className="text-green-500">{reviewSuccess}</p>}
-            <form onSubmit={submitReview} className="flex flex-col space-y-4">
-              <div>
-                <label className="block mb-1">Rating:</label>
-                <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="border rounded-md p-2 w-full">
-                  <option value="">Select Rating</option>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <option key={star} value={star}>{star} Star{star > 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1">Comment:</label>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-                  rows="4"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Your Name:</label>
-                <input
-                  type="text"
-                  value={reviewerName}
-                  onChange={(e) => setReviewerName(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Your Email:</label>
-                <input
-                  type="email"
-                  value={reviewerEmail}
-                  onChange={(e) => setReviewerEmail(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-                  required
-                />
-              </div>
-              <button type="submit" className="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
-                Submit Review
-              </button>
+              {reviewError && <p className="text-red-500">{reviewError}</p>}
+              {reviewSuccess && <p className="text-green-500">{reviewSuccess}</p>}
+              <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition mt-2">Submit Review</button>
             </form>
           </div>
+
+          {product.reviews && renderReviews(product.reviews)}
         </div>
       </div>
     </div>
