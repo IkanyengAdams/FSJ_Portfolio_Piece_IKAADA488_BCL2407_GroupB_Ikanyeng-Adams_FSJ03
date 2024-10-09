@@ -3,6 +3,54 @@
 SwiftCart is a responsive and dynamic e-commerce platform built with Next.js and React, offering a seamless shopping experience. It features robust product listings with search, filtering by categories, sorting by price, and pagination to help users easily find what they need. The detailed product pages display essential information such as price, stock, descriptions, tags, and customer reviews, with sorting options for reviews by date or rating. SwiftCart ensures that all search, filter, and sort options are reflected in the URL for easy sharing and bookmarking. The platform is fully responsive, optimized for SEO, and designed for scalability. Developers benefit from features like server-side rendering, image optimization, caching strategies, and a customizable architecture. SwiftCart is ideal for any online retail business looking for flexibility and growth potential.
 
 # Table of Contents
+- Technologies Used
+- Features
+- Setup Instructions
+- Usage Examples
+
+# Technologies Used
+This project utilizes a variety of modern technologies to ensure a smooth and efficient experience for both users and developers.
+
+- Next.js: For building server-side rendered and statically generated pages.
+- React.js: For creating interactive user interfaces with a component-based architecture.
+- Tailwind CSS: For utility-first, responsive styling.
+- React Icons: For adding dynamic icons to the interface.
+- Firebase: For fetching products and managing user authentication.
+- Font Awesome (FA Icons): For adding icons to the cart, wishlist, and user profile sections.
+
+# Features
+- Responsive Layout: Adapts to all screen sizes, from mobile to desktop.
+- Product Listing: Displays a paginated list of products fetched from Firebase.
+- Product Details: Includes detailed product information, such as price, description, and images.
+- Search Bar: Allows users to search for products by title or part of a title with real-time suggestions.
+- Sort by Price: Enables sorting of products by price in ascending or descending order.
+- Sort by Category: Allows users to filter products by category.
+- URL Synchronization: The URL reflects search, filter, sort, and pagination options, making it easy to bookmark and share specific views.
+- Pagination: If the filtered or sorted results exceed 20 products, they are paginated for easier navigation.
+- Dynamic Meta Tags: SEO optimized meta tags, with dynamic titles and descriptions for each product page.
+- Image Optimization: Uses Next.js built-in image optimization to ensure fast loading of product images.
+- Product Reviews: Displays customer reviews, with the ability to sort reviews by date or rating.
+- Carousel for Images: Enables users to navigate through product images.
+- Error Handling: Custom error messages for scenarios where products or data cannot be fetched.
+- Loading Spinner: Displays a spinner while content is loading.
+- State Persistence: Search, sorting, and filtering preferences are retained even after navigating to the product detail page and returning to the product list.
+
+# Setup Instructions
+## Prerequisites
+Before setting up the project, ensure you have the following installed:
+
+- Node.js (v14.x or above)
+- npm (v6.x or above)
+- Git
+
+## Steps to Run Locally
+1. Clone the Repository:
+   ```bash
+   git clone [https://github.com/yourusername/swiftcart.git](https://github.com/IkanyengAdams/IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01.git)
+   cd ./IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01
+
+
+# Table of Contents
 -Technologies Used
 
 -Features
@@ -22,7 +70,7 @@ This project utilizes a variety of modern technologies to ensure a smooth and ef
 
 -React Icons: For adding dynamic icons to the interface.
 
--Vercel API: For fetching products [from a mock API.](https://next-ecommerce-api.vercel.app/)
+-Firebase (cloud firestore): For fetching products [from a mock API.](https://next-ecommerce-api.vercel.app/)
 
 -Font Awesome (FA Icons): For adding icons to the cart, wishlist, and user profile sections.
 
