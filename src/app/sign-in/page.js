@@ -4,16 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { auth } from "../../../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
-
+  
   const router = useRouter();
 
   const handleSignIn = async (e) => {
@@ -24,6 +21,7 @@ export default function SignIn() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setLoading(false);
+      
 
       router.push("/");
     } catch (err) {
@@ -31,7 +29,6 @@ export default function SignIn() {
       setError(err.message);
     }
   };
-
 
   const goToSignUp = () => {
     router.push("/sign-up");
@@ -42,7 +39,6 @@ export default function SignIn() {
       <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-white">Sign In</h2>
         
-    
         <p className="text-gray-300 mb-4">
           Please sign in with your correct credentials.
         </p>
@@ -79,9 +75,7 @@ export default function SignIn() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-blue-700 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-blue-700 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>

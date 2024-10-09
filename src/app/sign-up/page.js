@@ -22,14 +22,12 @@ export default function SignUp() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       setLoading(false);
-
       router.push("/");
     } catch (err) {
       setLoading(false);
       setError(err.message);
     }
   };
-
 
   const handleGoBack = () => {
     router.push("/");
