@@ -46,8 +46,8 @@ Before setting up the project, ensure you have the following installed:
 ## Steps to Run Locally
 1. Clone the Repository:
    ```bash
-   git clone [https://github.com/yourusername/swiftcart.git](https://github.com/IkanyengAdams/IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01.git)
-   cd ./IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01
+   git clone [https://github.com/yourusername/swiftcart.git](https://github.com/IkanyengAdams/IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ03.git)
+   cd ./IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ03
 
 
 # Table of Contents
@@ -70,7 +70,11 @@ This project utilizes a variety of modern technologies to ensure a smooth and ef
 
 -React Icons: For adding dynamic icons to the interface.
 
--Firebase (cloud firestore): For fetching products [from a mock API.](https://next-ecommerce-api.vercel.app/)
+-Firebase (cloud firestore): For fetching products [Firebase](https://firebase.google.com/)
+
+-Authentication from Firebase
+
+- protected Reviews
 
 -Font Awesome (FA Icons): For adding icons to the cart, wishlist, and user profile sections.
 
@@ -117,8 +121,8 @@ Before setting up the project, ensure you have the following installed:
 
 # Steps to Run Locally
 1.Clone the Repository:
-  git clone [https://github.com/yourusername/swiftcart.git](https://github.com/IkanyengAdams/IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01.git)
-  cd ./IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ01
+  git clone [https://github.com/yourusername/swiftcart.git](https://github.com/IkanyengAdams/IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ03.git)
+  cd ./IKAADA488_BCL2407_GroupB_Ikanyeng-Adams_FSJ03
   
 2.Install Dependencies Once inside the project directory, install the required packages:
   npm install
@@ -155,5 +159,5 @@ The URL reflects your search, sorting, and filtering preferences, so you can eas
   If the data takes time to load, a spinner will be displayed to the user. If no products are 
   found or there’s a network error, a custom error message will be shown.
 
-  [Deployment Link](https://fsj-portfolio-piece-ikaada-488-bcl-2407-group-b-ikan-1rswlwbai.vercel.app/)
+  [Deployment Link](https://fsj-portfolio-piece-ikaada-488-bcl-2407-group-b-ikan-87jxmp7w5.vercel.app/)
 
