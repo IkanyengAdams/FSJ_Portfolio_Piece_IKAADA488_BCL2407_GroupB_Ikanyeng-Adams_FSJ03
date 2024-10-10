@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../../../../lib/firebase";
+import { useState } from "react";
 
+/**
+ * SortByPrice component allows users to sort products by price.
+ *
+ * @component
+ * @param {Object} props - The component's props.
+ * @param {Function} props.onSort - Callback function triggered when sorting is applied.
+ * It receives the sort order ('asc' or 'desc') as an argument.
+ *
+ * @example
+ * <SortByPrice onSort={(order) => console.log(order)} />
+ */
 export default function SortByPrice({ onSort }) {
   const [sortOrder, setSortOrder] = useState("");
 
   /**
    * Handles the change in the sorting order and updates the state.
    * Calls the onSort callback with the selected sorting order.
-   * Fetches products from Firestore based on the sorting order.
    *
    * @param {Object} e - The event object from the select input.
    */
@@ -17,31 +25,6 @@ export default function SortByPrice({ onSort }) {
     setSortOrder(selectedSort);
     onSort(selectedSort);
   };
-
-  useEffect(() => {
-    if (sortOrder) {
-      const fetchSortedProducts = async () => {
-        try {
-          const productsRef = collection(db, "products");
-
-          const q = query(productsRef, orderBy("price", sortOrder));
-
-          const querySnapshot = await getDocs(q);
-
-          const sortedProducts = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          onSort(sortedProducts);
-        } catch (error) {
-          console.error("Error fetching sorted products:", error);
-        }
-      };
-
-      fetchSortedProducts();
-    }
-  }, [sortOrder, onSort]);
 
   return (
     <div className="flex justify-center lg:justify-end mb-4">

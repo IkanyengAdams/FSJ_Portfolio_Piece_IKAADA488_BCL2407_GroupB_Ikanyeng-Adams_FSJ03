@@ -15,6 +15,11 @@ import SearchBar from "./components/common/SearchBar";
 import SortByCategory from "./components/common/SortByCategory";
 import SortByPrice from "./components/common/SortByPrice";
 
+/**
+ * Displays a page of products with search and sort functionality.
+ * Includes an image carousel for products with more than one image.
+ * @returns {JSX.Element} The ProductsPage component.
+ */
 export default function ProductView() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +34,6 @@ export default function ProductView() {
   const searchTerm = searchParams.get("search") || "";
   const category = searchParams.get("category") || "";
   const priceOrder = searchParams.get("price") || "";
-
 
   const fetchProducts = async (
     searchTerm = "",
@@ -87,9 +91,11 @@ export default function ProductView() {
     router.push(`?search=${term}&category=${category}&price=${priceOrder}`);
   };
 
-  const handleSort = (category) => {
+  const handleSort = (selectedCategory) => {
     setCurrentPage(1);
-    router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}`);
+    router.push(
+      `?search=${searchTerm}&category=${selectedCategory}&price=${priceOrder}`
+    );
   };
 
   const handleSortByPrice = (order) => {
@@ -99,8 +105,8 @@ export default function ProductView() {
 
   const handleReset = () => {
     setCurrentPage(1);
-    router.push(`?`); 
-  }
+    router.push(`?`);
+  };
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -114,8 +120,7 @@ export default function ProductView() {
     setCarouselIndex((prev) => ({
       ...prev,
       [productId]:
-        ((prev[productId] || 0) + 1) %
-        products.find((p) => p.id === productId).images.length,
+        ((prev[productId] || 0) + 1) % products.find((p) => p.id === productId).images.length,
     }));
   };
 
@@ -123,8 +128,7 @@ export default function ProductView() {
     setCarouselIndex((prev) => ({
       ...prev,
       [productId]:
-        ((prev[productId] || 0) - 1 +
-          products.find((p) => p.id === productId).images.length) %
+        ((prev[productId] || 0) - 1 + products.find((p) => p.id === productId).images.length) %
         products.find((p) => p.id === productId).images.length,
     }));
   };
@@ -230,23 +234,21 @@ export default function ProductView() {
             )}
           </div>
 
-          <div className="flex justify-between mt-8">
+          <div className="flex justify-between mt-4">
             <button
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
             >
               Previous
             </button>
-
-            <span className="text-gray-700 font-bold">
+            <span>
               Page {currentPage} of {totalPages}
             </span>
-
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="bg-gray-500 text-white px-4 py-2 rounded"
             >
               Next
             </button>
