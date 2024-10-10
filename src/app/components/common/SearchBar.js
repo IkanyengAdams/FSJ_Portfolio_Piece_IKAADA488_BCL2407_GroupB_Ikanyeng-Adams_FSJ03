@@ -38,18 +38,17 @@ export default function SearchBar({ onSearch }) {
    * It sets suggestions or updates the noResults state based on the fetched data.
    * Catches and logs any errors encountered during the fetch.
    */
-
   useEffect(() => {
     if (debouncedSearchTerm.trim()) {
       const fetchSuggestions = async () => {
         try {
           const response = await fetch(
-            `https://next-ecommerce-api.vercel.app/products?search=${debouncedSearchTerm}`
+            `/api/products?searchTerm=${debouncedSearchTerm}`
           );
           const data = await response.json();
 
-          if (data.length > 0) {
-            setSuggestions(data);
+          if (data.products && data.products.length > 0) {
+            setSuggestions(data.products);
             setNoResults(false);
           } else {
             setSuggestions([]);
