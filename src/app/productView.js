@@ -88,19 +88,17 @@ export default function ProductView() {
 
   const handleSearch = (term) => {
     setCurrentPage(1);
-    router.push(`?search=${term}&category=${category}&price=${priceOrder}`);
+    router.push(`?search=${term}&category=${category}&price=${priceOrder}&page=1`);
   };
 
   const handleSort = (selectedCategory) => {
     setCurrentPage(1);
-    router.push(
-      `?search=${searchTerm}&category=${selectedCategory}&price=${priceOrder}`
-    );
+    router.push(`?search=${searchTerm}&category=${selectedCategory}&price=${priceOrder}&page=1`);
   };
 
   const handleSortByPrice = (order) => {
     setCurrentPage(1);
-    router.push(`?search=${searchTerm}&category=${category}&price=${order}`);
+    router.push(`?search=${searchTerm}&category=${category}&price=${order}&page=1`);
   };
 
   const handleReset = () => {
@@ -109,11 +107,15 @@ export default function ProductView() {
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    const nextPage = Math.min(currentPage + 1, totalPages);
+    setCurrentPage(nextPage);
+    router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${nextPage}`);
   };
 
   const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    const prevPage = Math.max(currentPage - 1, 1);
+    setCurrentPage(prevPage);
+    router.push(`?search=${searchTerm}&category=${category}&price=${priceOrder}&page=${prevPage}`);
   };
 
   const handleNextImage = (productId) => {
@@ -216,6 +218,7 @@ export default function ProductView() {
                           search: searchTerm,
                           category: category,
                           price: priceOrder,
+                          page: currentPage,
                         },
                       }}
                     >

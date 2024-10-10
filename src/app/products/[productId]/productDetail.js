@@ -120,11 +120,10 @@ export default function ProductDetail({ params }) {
                     <FaRegStar key={i} className="text-yellow-500" />
                   )
                 )}
-                <span className="ml-2 text-gray-600">
-                  {review.reviewerName}
-                </span>
+                <span className="ml-2 text-gray-600">{review.reviewerName}</span>
               </div>
               <p className="text-gray-700">{review.comment}</p>
+              <p className="text-gray-500 text-sm">{review.reviewerEmail}</p>
               <p className="text-gray-500 text-sm">
                 {review.date &&
                   new Date(review.date.seconds * 1000).toLocaleDateString()}
@@ -211,7 +210,6 @@ export default function ProductDetail({ params }) {
    */
 
   const handleDeleteReview = async (reviewId) => {
-    // Instead of a confirmation dialog, we will handle it directly
     try {
       await deleteDoc(doc(db, "products", productId, "reviews", reviewId));
       const updatedReviews = product.reviews.filter(
@@ -256,6 +254,7 @@ export default function ProductDetail({ params }) {
         rating,
         comment,
         reviewerName,
+        reviewerEmail,
         date: { seconds: Math.floor(Date.now() / 1000) },
       };
 
@@ -280,101 +279,92 @@ export default function ProductDetail({ params }) {
   return (
     <div className="container mx-auto p-4">
       <Head>
-        <title>{product.title} | Your Store</title>
-        <meta name="description" content={product.description} />
-        <meta property="og:title" content={product.title} />
-        <meta property="og:description" content={product.description} />
-        <meta property="og:image" content={product.images[0] || ""} />
+        <title>{product ? product.title : "Product"}</title>
+        <meta name="description" content={product?.description || "Product"} />
       </Head>
-
       <button
         onClick={() => router.back()}
-        className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+        className="bg-gray-200 text-gray-800 py-2 px-4 rounded-md mb-4 hover:bg-gray-300 transition"
       >
         Back
       </button>
-
-      <div className="flex flex-col lg:flex-row bg-white p-6 shadow-md rounded-lg">
-        <div className="relative lg:w-1/3 w-full mb-4 lg:mb-0">
-          {product.images && (
-            <>
-              <img
-                src={selectedImage}
-                alt={product.title}
-                className="w-full h-auto object-contain mb-4"
-              />
-              <div className="flex space-x-2">
-                {product.images.map((image) => (
-                  <img
-                    key={image}
-                    src={image}
-                    alt={product.title}
-                    onClick={() => setSelectedImage(image)}
-                    className={`cursor-pointer w-16 h-16 object-cover ${
-                      image === selectedImage
-                        ? "border-2 border-blue-500"
-                        : "border"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-1/2">
+          {selectedImage && (
+            <img
+              src={selectedImage}
+              alt={product.title}
+              className="w-full h-auto object-cover"
+            />
           )}
         </div>
-
-        <div className="lg:w-2/3 w-full pl-4">
-          <h1 className="text-2xl font-bold">{product.title}</h1>
-          <p className="text-lg text-gray-600">{`$${product.price.toFixed(
-            2
-          )}`}</p>
-          <p className="mt-4">{product.description}</p>
-
-          <div className="mt-4">
-            <h2 className="font-bold">Add a Review:</h2>
-            <form onSubmit={submitReview} className="mt-2">
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="border rounded-md p-2 w-full"
-                rows="4"
+        <div className="md:w-1/2 md:pl-8">
+          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+          <p className="text-gray-700 mb-4">{product.description}</p>
+          <p className="text-lg font-semibold mb-4">${product.price}</p>
+          <div className="flex space-x-2 mb-4">
+            {product.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-1 bg-gray-200 rounded-full text-sm text-gray-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          <form onSubmit={submitReview} className="mt-4">
+            <h3 className="font-bold mb-2">Leave a review:</h3>
+            <input
+              type="email"
+              value={reviewerEmail}
+              onChange={(e) => setReviewerEmail(e.target.value)}
+              placeholder="Your email"
+              className="border p-2 rounded-md w-full mb-2"
+              required
+            />
+            <input
+              type="text"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Your name"
+              className="border p-2 rounded-md w-full mb-2"
+              required
+            />
+            <div className="flex items-center mb-2">
+              <span className="mr-2">Rating:</span>
+              <input
+                type="number"
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+                min="0"
+                max="5"
+                step="0.5"
+                className="border p-2 rounded-md"
                 required
               />
-              <div className="flex items-center mt-2">
-                <label className="mr-2">Rating:</label>
-                {[1, 2, 3, 4, 5].map((rate) => (
-                  <label
-                    key={rate}
-                    className="flex items-center cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      value={rate}
-                      checked={rating === rate}
-                      onChange={(e) => setRating(Number(e.target.value))}
-                      className="hidden"
-                    />
-                    <FaStar
-                      className={`text-yellow-500 ${
-                        rating >= rate ? "text-yellow-500" : "text-gray-300"
-                      }`}
-                    />
-                  </label>
-                ))}
-              </div>
-              {reviewError && <p className="text-red-500">{reviewError}</p>}
-              {reviewSuccess && (
-                <p className="text-green-500">{reviewSuccess}</p>
-              )}
-              <button
-                type="submit"
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition mt-2"
-              >
-                Submit Review
-              </button>
-            </form>
-          </div>
-
-          {product.reviews && renderReviews(product.reviews)}
+            </div>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write your review..."
+              className="border rounded-md p-2 w-full"
+              rows="4"
+              required
+            />
+            {reviewError && (
+              <p className="text-red-500 mt-2">{reviewError}</p>
+            )}
+            {reviewSuccess && (
+              <p className="text-green-500 mt-2">{reviewSuccess}</p>
+            )}
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition mt-2"
+            >
+              Submit Review
+            </button>
+          </form>
+          {renderReviews(product.reviews)}
         </div>
       </div>
     </div>
