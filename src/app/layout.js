@@ -7,7 +7,6 @@ import Link from "next/link";
 import { auth } from "../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import Head from "next/head"; // Import Head from Next.js
 
 export default function Layout({ children }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -33,6 +32,9 @@ export default function Layout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#ffffff" />
+        <link rel="icon" href="/icons/icon-192x192.png" />
         <link rel="icon" href="/icon.png" />
       </head>
       <body>
